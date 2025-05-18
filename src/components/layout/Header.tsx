@@ -2,9 +2,14 @@
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogOut, User } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -19,12 +24,45 @@ const Header = () => {
           <Link to="/properties" className="text-foreground hover:text-real-gold transition-colors">Properties</Link>
           <Link to="/agents" className="text-foreground hover:text-real-gold transition-colors">Agents</Link>
           <Link to="/contact" className="text-foreground hover:text-real-gold transition-colors">Contact</Link>
-          <Button asChild variant="outline" className="ml-2">
-            <Link to="/login">Sign In</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/register">Register</Link>
-          </Button>
+          
+          {isAuthenticated ? (
+            <div className="relative">
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="" alt="User" />
+                  <AvatarFallback className="bg-real-gold text-white">
+                    {user?.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden lg:inline">{user?.email}</span>
+              </Button>
+              
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  <button
+                    onClick={logout}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <LogOut size={16} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Button asChild variant="outline" className="ml-2">
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/register">Register</Link>
+              </Button>
+            </>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -52,12 +90,37 @@ const Header = () => {
           <Link to="/agents" className="text-foreground hover:text-real-gold transition-colors py-2">Agents</Link>
           <Link to="/contact" className="text-foreground hover:text-real-gold transition-colors py-2">Contact</Link>
           <hr className="my-2" />
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/login">Sign In</Link>
-          </Button>
-          <Button asChild className="w-full">
-            <Link to="/register">Register</Link>
-          </Button>
+          
+          {isAuthenticated ? (
+            <>
+              <div className="flex items-center gap-2 py-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="" alt="User" />
+                  <AvatarFallback className="bg-real-gold text-white">
+                    {user?.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{user?.email}</span>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center justify-center gap-2"
+                onClick={logout}
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button asChild className="w-full">
+                <Link to="/register">Register</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

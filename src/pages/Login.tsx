@@ -1,10 +1,9 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -27,6 +27,7 @@ const formSchema = z.object({
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,8 +37,7 @@ const Login = () => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // This would normally connect to an authentication service
-    // For now, we'll just show a success message and redirect
+    login(values.email, values.password);
     toast.success("Successfully logged in!");
     navigate("/");
   }
