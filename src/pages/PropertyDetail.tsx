@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Property } from '@/components/properties/PropertyCard';
+import PropertyCard, { Property } from '@/components/properties/PropertyCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockProperties } from '@/data/mockData';
 import { toast } from "sonner";
