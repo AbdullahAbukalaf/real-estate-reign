@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Property } from '@/components/properties/PropertyCard';
 import { toast } from "sonner";
 
 interface WishlistContextType {
@@ -19,7 +18,15 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedFavorites = localStorage.getItem('favorites');
     if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
+      try {
+        const parsedFavorites = JSON.parse(storedFavorites);
+        if (Array.isArray(parsedFavorites)) {
+          setFavorites(parsedFavorites);
+        }
+      } catch (error) {
+        console.error("Failed to parse favorites from localStorage:", error);
+        localStorage.removeItem('favorites');
+      }
     }
   }, []);
 
@@ -29,8 +36,10 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   }, [favorites]);
 
   const addToFavorites = (propertyId: number) => {
-    setFavorites(prev => [...prev, propertyId]);
-    toast.success("Property added to favorites!");
+    if (!favorites.includes(propertyId)) {
+      setFavorites(prev => [...prev, propertyId]);
+      toast.success("Property added to favorites!");
+    }
   };
 
   const removeFromFavorites = (propertyId: number) => {
