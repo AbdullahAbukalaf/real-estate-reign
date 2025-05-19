@@ -2,6 +2,8 @@
 import { Link } from 'react-router-dom';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useWishlist } from '@/context/WishlistContext';
+import { Heart } from 'lucide-react';
 
 export interface Property {
   id: number;
@@ -21,12 +23,26 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({ property }: PropertyCardProps) => {
+  const { isFavorite, addToFavorites, removeFromFavorites } = useWishlist();
+  const favorited = isFavorite(property.id);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (favorited) {
+      removeFromFavorites(property.id);
+    } else {
+      addToFavorites(property.id);
+    }
   };
 
   return (
@@ -45,6 +61,15 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         >
           {property.status}
         </Badge>
+        <button
+          onClick={handleFavoriteToggle}
+          className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm ${
+            favorited ? 'text-red-500' : 'text-gray-500'
+          } hover:text-red-500 transition-colors`}
+          aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Heart className="h-5 w-5" fill={favorited ? "currentColor" : "none"} />
+        </button>
       </div>
       
       <div className="p-5">
@@ -73,9 +98,11 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           </span>
         </div>
         
-        <Button asChild className="w-full">
-          <Link to={`/properties/${property.id}`}>View Details</Link>
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button asChild className="w-full">
+            <Link to={`/properties/${property.id}`}>View Details</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

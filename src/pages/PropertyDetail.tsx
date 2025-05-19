@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from "@/components/layout/Header";
@@ -7,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import PropertyCard, { Property } from '@/components/properties/PropertyCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockProperties } from '@/data/mockData';
+import { useWishlist } from '@/context/WishlistContext';
+import { Heart, Calendar } from 'lucide-react';
 import { toast } from "sonner";
 
 const PropertyDetail = () => {
@@ -14,7 +15,7 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, addToFavorites, removeFromFavorites } = useWishlist();
   
   // Mock additional images
   const additionalImages = [
@@ -42,11 +43,12 @@ const PropertyDetail = () => {
   };
 
   const handleFavoriteToggle = () => {
-    setIsFavorite(!isFavorite);
-    if (!isFavorite) {
-      toast.success("Property added to favorites!");
+    if (!property) return;
+    
+    if (isFavorite(property.id)) {
+      removeFromFavorites(property.id);
     } else {
-      toast.info("Property removed from favorites");
+      addToFavorites(property.id);
     }
   };
 
@@ -153,12 +155,10 @@ const PropertyDetail = () => {
                     </div>
                     <button 
                       onClick={handleFavoriteToggle}
-                      className={`p-2 rounded-full ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}
-                      aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                      className={`p-2 rounded-full bg-white/80 backdrop-blur-sm ${isFavorite(property.id) ? 'text-red-500' : 'text-gray-400'}`}
+                      aria-label={isFavorite(property.id) ? "Remove from favorites" : "Add to favorites"}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
+                      <Heart fill={isFavorite(property.id) ? "currentColor" : "none"} className="h-6 w-6" />
                     </button>
                   </div>
 
@@ -181,7 +181,12 @@ const PropertyDetail = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full mb-3">Schedule a Viewing</Button>
+                  <Button asChild className="w-full mb-3 flex items-center gap-2">
+                    <Link to={`/properties/${property.id}/reserve`}>
+                      <Calendar className="w-5 h-5" />
+                      Schedule a Viewing
+                    </Link>
+                  </Button>
                   <Button variant="outline" className="w-full">Contact Agent</Button>
                 </div>
               </div>
@@ -189,7 +194,7 @@ const PropertyDetail = () => {
           </div>
         </section>
 
-        {/* Property Details */}
+        {/* Property Details Tabs */}
         <section className="py-12">
           <div className="container px-4 md:px-8">
             <Tabs defaultValue="description">
